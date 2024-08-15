@@ -1,0 +1,14 @@
+name: Deploy to Google Cloud
+
+on:
+  push:
+    branches: [cd]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@v4
