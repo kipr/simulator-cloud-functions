@@ -9,22 +9,10 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     permissions:
+      # Needed to produce an OIDC token, which is used for Workload Identity Federation with Google Cloud
       id-token: write
       contents: read
-
     steps:
-      # - name: Checkout actions-oidc-debugger
-      #   uses: actions/checkout@v3
-      #   with:
-      #     repository: github/actions-oidc-debugger
-      #     ref: main
-      #     # token: ${{ secrets.your-checkout-token }}
-      #     path: ./.github/actions/actions-oidc-debugger
-      # - name: Debug OIDC Claims
-      #   uses: ./.github/actions/actions-oidc-debugger
-      #   with:
-      #     audience: '${{ github.server_url }}/${{ github.repository_owner }}'
-
       - name: Check out repo
         uses: actions/checkout@v4
         with:
@@ -35,13 +23,6 @@ jobs:
           node-version: '20.x'
       - name: Install firebase-tools
         run: npm install -g firebase-tools
-      # - name: Authenticate to Google
-      #   uses: 'google-github-actions/auth@v2'
-      #   with:
-      #     credentials_json: ${{ secrets.GCP_SA_KEY }}
-      #     create_credentials_file: true
-      #     export_environment_variables: true
-      #     cleanup_credentials: true
       - name: Authenticate to Google
         uses: 'google-github-actions/auth@v2'
         with:
@@ -51,24 +32,17 @@ jobs:
           create_credentials_file: true
           export_environment_variables: true
           cleanup_credentials: true
-      - name: List firebase projects
-        run: firebase projects:list
-      - name: Output auth details
-        run: cat $GOOGLE_APPLICATION_CREDENTIALS
       - name: Install dependencies
         run: npm install
         working-directory: checkout-prefix
       - name: Build
         run: npm run build
         working-directory: checkout-prefix
-      # - name: Output directory
-      #   run: ls
-      # - name: Output checkout directory
-      #   run: ls checkout-prefix
       - name: Deploy functions
+        id: deployFunctions
         run: npm run deploy
         working-directory: checkout-prefix
-      - name: Output firebase debug log
-        if: always()
+      - name: Output firebase debug log on deployment failure
+        if: always() && (steps.deployFunctions.outcome == 'failure')
         run: cat firebase-debug.log
         working-directory: checkout-prefix
