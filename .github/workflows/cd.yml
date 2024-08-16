@@ -51,6 +51,10 @@ jobs:
       - name: Build
         run: npm run build
         working-directory: checkout-prefix
+      - name: Output directory
+        run: ls
+      - name: Output checkout directory
+        run: ls checkout-prefix
       # - name: Deploy functions
       #   run: npm run deploy
       # - name: Output firebase debug log
