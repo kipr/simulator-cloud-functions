@@ -49,6 +49,8 @@ jobs:
           cleanup_credentials: true
       - name: List firebase projects
         run: firebase projects:list
+      - name: Output auth details
+        run: cat $GOOGLE_APPLICATION_CREDENTIALS
       - name: Install dependencies
         run: npm install
         working-directory: checkout-prefix
