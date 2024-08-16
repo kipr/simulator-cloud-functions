@@ -27,6 +27,8 @@ jobs:
 
       - name: Check out repo
         uses: actions/checkout@v4
+        with:
+          path: checkout-prefix
       # - name: Install firebase-tools
       #   run: npm install -g firebase-tools
       # - name: Authenticate to Google
