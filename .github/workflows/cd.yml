@@ -10,23 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
-      - name: Install firebase-tools
-        run: npm install -g firebase-tools
-      - name: Authenticate to Google
-        uses: 'google-github-actions/auth@v2'
+      - name: Checkout actions-oidc-debugger
+        uses: actions/checkout@v3
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-          create_credentials_file: true
-          export_environment_variables: true
-          cleanup_credentials: true
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build
-      - name: Deploy functions
-        run: npm run deploy
-      - name: Output firebase debug log
-        if: always()
-        run: cat firebase-debug.log
+          repository: github/actions-oidc-debugger
+          ref: main
+          # token: ${{ secrets.your-checkout-token }}
+          path: ./.github/actions/actions-oidc-debugger
+      - name: Debug OIDC Claims
+        uses: ./.github/actions/actions-oidc-debugger
+        with:
+          audience: '${{ github.server_url }}/${{ github.repository_owner }}'
+      # - name: Check out repo
+      #   uses: actions/checkout@v4
+      # - name: Install firebase-tools
+      #   run: npm install -g firebase-tools
+      # - name: Authenticate to Google
+      #   uses: 'google-github-actions/auth@v2'
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_SA_KEY }}
+      #     create_credentials_file: true
+      #     export_environment_variables: true
+      #     cleanup_credentials: true
+      # - name: Install dependencies
+      #   run: npm install
+      # - name: Build
+      #   run: npm run build
+      # - name: Deploy functions
+      #   run: npm run deploy
+      # - name: Output firebase debug log
+      #   if: always()
+      #   run: cat firebase-debug.log
