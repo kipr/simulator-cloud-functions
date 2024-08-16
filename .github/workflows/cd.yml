@@ -47,6 +47,8 @@ jobs:
           create_credentials_file: true
           export_environment_variables: true
           cleanup_credentials: true
+      - name: List firebase projects
+        run: firebase projects:list
       - name: Install dependencies
         run: npm install
         working-directory: checkout-prefix
