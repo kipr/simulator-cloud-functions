@@ -10,7 +10,7 @@ initializeApp();
 const DELETION_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 const QUERY_PAGE_SIZE = 100;
 
-export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) => {
+export const unconsentedUserCleanup = onSchedule("every 1 hour", async (event) => {
   logger.info('Starting cleanup of unconsented users');
 
   const firestore = getFirestore();
