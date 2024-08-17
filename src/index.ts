@@ -41,7 +41,7 @@ export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) =
       logger.info('Processing user', { userId: userId });
 
       // Parse the "sent at" field
-      const sentAtString = doc.get('legalAcceptance.sentAt');
+      const sentAtString: unknown = doc.get('legalAcceptance.sentAt');
       if (!sentAtString || typeof sentAtString !== 'string') {
         logger.error(`'sentAt' string field does not exist in user doc. Skipping user`, { userId: userId });
         continue;
@@ -69,7 +69,7 @@ export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) =
       //   if (e && typeof e === 'object' && 'code' in e && e.code === 'auth/user-not-found') {
       //     logger.warn('Failed to delete user because user was not found. Proceeding anyway', { userId: userId });
       //   } else {
-      //     logger.error(`Failed to delete user: ${e}`, { userId: userId });
+      //     logger.error(`Failed to delete user: ${JSON.stringify(e)}`, { userId: userId });
       //     continue;
       //   }
       // }
@@ -79,7 +79,7 @@ export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) =
       //   await doc.ref.delete();
       //   logger.info('Successfully deleted doc for user', { userId: userId });
       // } catch (e) {
-      //   logger.error(`Failed to delete doc: ${e}`, { userId: userId });
+      //   logger.error(`Failed to delete doc: ${JSON.stringify(e)}`, { userId: userId });
       //   continue;
       // }
 
