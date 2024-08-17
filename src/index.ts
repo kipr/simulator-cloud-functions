@@ -11,7 +11,7 @@ const DELETION_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 const QUERY_PAGE_SIZE = 100;
 
 export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) => {
-  logger.info("Hello logs!", { structuredData: true });
+  logger.info('Starting cleanup of unconsented users');
 
   const firestore = getFirestore();
   const auth = getAuth();
@@ -32,44 +32,44 @@ export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) =
       querySnapshot = querySnapshot.startAfter(lastDocInSnapshot);
     }
 
-    console.log('Querying page of users');
+    logger.debug('Querying page of users');
     snapshot = await querySnapshot.get();
-    console.log(`Found ${snapshot.size} users to process`);
+    logger.info(`Found ${snapshot.size} users to process`);
 
     for (const doc of snapshot.docs) {
       const userId = doc.id;
-      console.log(`Processing user ${userId}`);
+      logger.info('Processing user', { userId: userId });
 
       // Parse the "sent at" field
       const sentAtString = doc.get('legalAcceptance.sentAt');
       if (!sentAtString || typeof sentAtString !== 'string') {
-        console.error(`'sentAt' string field does not exist in user doc. Skipping user`);
+        logger.error(`'sentAt' string field does not exist in user doc. Skipping user`, { userId: userId });
         continue;
       }
 
       const sentAtDateMs = Date.parse(sentAtString);
       if (isNaN(sentAtDateMs)) {
-        console.error(`'sentAt' field is not a valid datetime`);
+        logger.error(`'sentAt' field is not a valid datetime`, { userId: userId });
         continue;
       }
 
       // Check if time threshold for deletion has been reached
       if (Date.now() - sentAtDateMs < DELETION_THRESHOLD_MS) {
-        console.log('Time threshold for deletion not reached. Skipping user');
+        logger.info('Time threshold for deletion not reached. Skipping user', { userId: userId });
         continue;
       }
 
-      console.log(`Should delete user ${userId}`);
+      logger.info('Should delete user', { userId: userId });
 
       // // Delete the user
       // try {
       //   await auth.deleteUser(userId);
-      //   console.log(`Successfully deleted user ${userId}`);
+      //   logger.info('Successfully deleted user', { userId: userId });
       // } catch (e) {
       //   if (e && typeof e === 'object' && 'code' in e && e.code === 'auth/user-not-found') {
-      //     console.warn(`Failed to delete user because user was not found. Proceeding anyway`);
+      //     logger.warn('Failed to delete user because user was not found. Proceeding anyway', { userId: userId });
       //   } else {
-      //     console.error(`Failed to delete user: ${e}`);
+      //     logger.error(`Failed to delete user: ${e}`, { userId: userId });
       //     continue;
       //   }
       // }
@@ -77,15 +77,15 @@ export const unconsentedUserCleanup = onSchedule("every 5 mins", async (event) =
       // // Delete the user doc
       // try {
       //   await doc.ref.delete();
-      //   console.log(`Successfully deleted doc for user ${userId}`);
+      //   logger.info('Successfully deleted doc for user', { userId: userId });
       // } catch (e) {
-      //   console.error(`Failed to delete doc: ${e}`);
+      //   logger.error(`Failed to delete doc: ${e}`, { userId: userId });
       //   continue;
       // }
 
-      console.log(`Finished processing user ${userId}`);
+      logger.info('Finished processing user', { userId: userId });
     }
     
-    console.log('Finished processing page of users');
+    logger.info('Finished processing page of users');
   } while (snapshot.size > 0);
 });
