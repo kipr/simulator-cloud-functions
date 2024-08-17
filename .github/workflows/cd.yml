@@ -2,7 +2,7 @@ name: Deploy to Google Cloud
 
 on:
   push:
-    branches: [cd]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -26,9 +26,9 @@ jobs:
       - name: Authenticate to Google
         uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/705985154569/locations/global/workloadIdentityPools/kipr-github-identity-pool/providers/github'
-          project_id: 'kipr-321905'
-          service_account: 'simulator-cloud-functions-gith@kipr-321905.iam.gserviceaccount.com'
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_ID }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_ADDRESS }}
           create_credentials_file: true
           export_environment_variables: true
           cleanup_credentials: true
