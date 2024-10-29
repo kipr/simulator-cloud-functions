@@ -7,7 +7,6 @@ import { getAuth } from "firebase-admin/auth";
 
 initializeApp();
 
-const DELETION_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
 const QUERY_PAGE_SIZE = 100;
 
 export const unconsentedUserCleanup = onSchedule("every 1 hour", async (event) => {
@@ -18,13 +17,14 @@ export const unconsentedUserCleanup = onSchedule("every 1 hour", async (event) =
 
   let snapshot: QuerySnapshot | null = null;
 
+  const now = Date.now();
+
   do {
-    // Get all users who are awaiting parental consent
-    // TODO: also get users in "started" state?
+    // Get all users whose consent process has expired
     let querySnapshot = firestore
       .collection('user')
-      .where('legalAcceptance.state', '==', 'awaiting-parental-consent')
-      .where('legalAcceptance.autoDelete', '==', true)
+      .where('legalAcceptance.state', 'in', ['not-started', 'awaiting-parental-consent'])
+      .where('legalAcceptance.expiresAt', '<=', now)
       .limit(QUERY_PAGE_SIZE);
     
     const lastDocInSnapshot = snapshot?.docs[snapshot?.docs.length - 1];
@@ -38,26 +38,6 @@ export const unconsentedUserCleanup = onSchedule("every 1 hour", async (event) =
 
     for (const doc of snapshot.docs) {
       const userId = doc.id;
-      logger.info('Processing user', { userId: userId });
-
-      // Parse the "sent at" field
-      const sentAtString: unknown = doc.get('legalAcceptance.sentAt');
-      if (!sentAtString || typeof sentAtString !== 'string') {
-        logger.error(`'sentAt' string field does not exist in user doc. Skipping user`, { userId: userId });
-        continue;
-      }
-
-      const sentAtDateMs = Date.parse(sentAtString);
-      if (isNaN(sentAtDateMs)) {
-        logger.error(`'sentAt' field is not a valid datetime`, { userId: userId });
-        continue;
-      }
-
-      // Check if time threshold for deletion has been reached
-      if (Date.now() - sentAtDateMs < DELETION_THRESHOLD_MS) {
-        logger.info('Time threshold for deletion not reached. Skipping user', { userId: userId });
-        continue;
-      }
 
       logger.info('Should delete user', { userId: userId });
 
