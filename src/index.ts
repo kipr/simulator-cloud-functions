@@ -9,7 +9,7 @@ initializeApp();
 
 const QUERY_PAGE_SIZE = 100;
 
-export const unconsentedUserCleanup = onSchedule("every 1 hour", async (event) => {
+export const unconsentedUserCleanup = onSchedule("every 1 hours", async (event) => {
   logger.info('Starting cleanup of unconsented users');
 
   const firestore = getFirestore();
