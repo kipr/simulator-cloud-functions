@@ -39,29 +39,29 @@ export const unconsentedUserCleanup = onSchedule("every 1 hours", async (event) 
     for (const doc of snapshot.docs) {
       const userId = doc.id;
 
-      logger.info('Should delete user', { userId: userId });
+      logger.info('Processing user for deletion', { userId: userId });
 
-      // // Delete the user
-      // try {
-      //   await auth.deleteUser(userId);
-      //   logger.info('Successfully deleted user', { userId: userId });
-      // } catch (e) {
-      //   if (e && typeof e === 'object' && 'code' in e && e.code === 'auth/user-not-found') {
-      //     logger.warn('Failed to delete user because user was not found. Proceeding anyway', { userId: userId });
-      //   } else {
-      //     logger.error(`Failed to delete user: ${JSON.stringify(e)}`, { userId: userId });
-      //     continue;
-      //   }
-      // }
+      // Delete the user
+      try {
+        await auth.deleteUser(userId);
+        logger.info('Successfully deleted user', { userId: userId });
+      } catch (e) {
+        if (e && typeof e === 'object' && 'code' in e && e.code === 'auth/user-not-found') {
+          logger.warn('Failed to delete user because user was not found. Proceeding anyway', { userId: userId });
+        } else {
+          logger.error(`Failed to delete user: ${JSON.stringify(e)}`, { userId: userId });
+          continue;
+        }
+      }
 
-      // // Delete the user doc
-      // try {
-      //   await doc.ref.delete();
-      //   logger.info('Successfully deleted doc for user', { userId: userId });
-      // } catch (e) {
-      //   logger.error(`Failed to delete doc: ${JSON.stringify(e)}`, { userId: userId });
-      //   continue;
-      // }
+      // Delete the user doc
+      try {
+        await doc.ref.delete();
+        logger.info('Successfully deleted doc for user', { userId: userId });
+      } catch (e) {
+        logger.error(`Failed to delete doc: ${JSON.stringify(e)}`, { userId: userId });
+        continue;
+      }
 
       logger.info('Finished processing user', { userId: userId });
     }
